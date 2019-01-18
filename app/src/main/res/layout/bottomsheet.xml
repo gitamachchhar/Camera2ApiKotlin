@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/bottomSheet"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:clipToPadding="true"
+    android:orientation="vertical"
+    app:behavior_hideable="false"
+    android:background="@color/purplish_brown"
+    app:behavior_peekHeight="0dp"
+    app:layout_behavior="android.support.design.widget.BottomSheetBehavior">
+
+    <LinearLayout
+        android:background="@color/purple_brown"
+        android:id="@+id/topCaptionLayout1"
+        android:layout_width="match_parent"
+        android:layout_height="?android:attr/actionBarSize"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="5dp">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/ic_back"
+            android:layout_width="?android:attr/actionBarSize"
+            android:layout_height="?android:attr/actionBarSize"
+            android:layout_marginEnd="@dimen/dimen_10dp"
+            android:padding="@dimen/dimen_15dp"
+            android:background="?android:attr/selectableItemBackground"
+            app:srcCompat="@drawable/ic_back_arrow" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textColor="@color/white"
+            android:textSize="@dimen/txt_16" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/expand_icon"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="end"
+            android:layout_marginEnd="10dp"
+            android:background="?android:selectableItemBackground"
+            android:padding="@dimen/dimen_6dp"
+            android:visibility="invisible"
+            app:srcCompat="@drawable/ic_expand_less_black_24dp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/topCaptionLayout2"
+        android:layout_width="match_parent"
+        android:layout_height="?android:attr/actionBarSize"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="5dp"
+        android:background="@color/purple_brown"
+        android:visibility="gone">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/icon_back"
+            android:layout_width="?android:attr/actionBarSize"
+            android:layout_height="?android:attr/actionBarSize"
+            android:layout_marginEnd="@dimen/dimen_10dp"
+            android:padding="@dimen/dimen_15dp"
+            android:background="?android:attr/selectableItemBackground"
+            app:srcCompat="@drawable/ic_back_arrow" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/fileCounter"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:layout_weight="1"
+            android:textColor="@color/white"
+            android:textSize="@dimen/txt_16"  />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/submitMedia"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:padding="10dp"
+            android:text="OK"
+            android:textColor="@color/white"
+            android:textSize="@dimen/txt_16"
+            />
+
+    </LinearLayout>
+
+    <GridView
+        android:id="@+id/fullscreenGallery"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:horizontalSpacing="5dp"
+        android:numColumns="3"
+        android:stretchMode="columnWidth"
+        android:verticalSpacing="5dp" />
+
+</androidx.appcompat.widget.LinearLayoutCompat>

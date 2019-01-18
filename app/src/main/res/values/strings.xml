@@ -1,0 +1,10 @@
+<resources>
+	<string name="app_name">Camera2ApiKotlin</string>
+	<string name="short_seconds">sec</string>
+	<string name="camera_error">This device doesn\'t support Camera2 API.</string>
+	<string name="request_permission">App needs camera permission.</string>
+	<string name="megabyte">MB</string>
+	<string name="kilobyte">KB</string>
+	<string name="permission_denial_msg">
+		<![CDATA[If you reject permission message will not be auto detected, Please turn on permissions at [Setting] > [Permission]]]></string>
+</resources>

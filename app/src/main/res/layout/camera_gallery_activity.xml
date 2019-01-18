@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/cl_main"
+    android:background="@color/purplish_brown">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <com.camera2kotlin.widgets.AutoFitTextureView
+            android:id="@+id/texture"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvTimer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="@dimen/dimen_8dp"
+            android:background="#cc222222"
+            android:padding="@dimen/dimen_8dp"
+            android:text="00:00"
+            android:textColor="@android:color/white"
+            android:visibility="gone" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/openLargeGallery"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_above="@+id/listMedia"
+            android:layout_centerHorizontal="true"
+            android:src="@drawable/ic_expand_less_black_24dp" />
+
+        <RelativeLayout
+            android:id="@+id/sendSelected"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:visibility="gone"
+            android:layout_above="@+id/listMedia">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_margin="@dimen/dimen_10dp"
+                android:background="@drawable/counter_round"
+                android:padding="@dimen/dimen_10dp"
+                android:src="@drawable/ic_outline_done_24px"
+                android:tint="@color/purplish_brown"
+               />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/media_counter"
+                android:text="10"
+                android:layout_marginTop="@dimen/dimen_20dp"
+                android:layout_marginStart="@dimen/dimen_20dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/purplish_brown" />
+
+        </RelativeLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/listMedia"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/captureMedia"
+            android:layout_marginBottom="10dp" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/captureMedia"
+            android:layout_width="@dimen/dimen_60dp"
+            android:layout_height="@dimen/dimen_60dp"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_gravity="center"
+            android:layout_marginBottom="10dp"
+            android:src="@drawable/capture_button" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/cameraFace"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginBottom="@dimen/dimen_18dp"
+            android:padding="10dp"
+            android:layout_marginEnd="@dimen/dimen_25dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_switch_camera" />
+    </RelativeLayout>
+
+    <include layout="@layout/bottomsheet" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

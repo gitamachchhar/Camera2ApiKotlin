@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/black">
+
+    <include
+        android:id="@+id/viewfile"
+        layout="@layout/viewmediafile"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/sendMessage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="@dimen/dimen_8dp"
+        android:layout_marginEnd="@dimen/dimen_32dp"
+        android:layout_marginBottom="@dimen/dimen_32dp"
+        android:src="@drawable/ic_baseline_send_24px"
+        android:visibility="visible" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:orientation="vertical">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/selectedListMedia"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp" />
+
+        <LinearLayout
+            android:id="@+id/bottomCaptionLayout"
+            android:layout_width="match_parent"
+            android:layout_height="?android:actionBarSize"
+            android:background="#cc222222"
+            android:gravity="center_vertical"
+            android:visibility="visible">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/iv_imageBack"
+                android:layout_marginStart="@dimen/dimen_10dp"
+                android:layout_marginEnd="@dimen/dimen_5dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_gallerycamera_icon"
+                android:tint="@android:color/white" />
+
+            <View
+                android:layout_width="0.5dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="@dimen/dimen_4dp"
+                android:layout_marginTop="@dimen/dimen_8dp"
+                android:layout_marginBottom="@dimen/dimen_8dp"
+                android:background="@android:color/white" />
+
+            <androidx.appcompat.widget.AppCompatEditText
+                android:id="@+id/edtCaption"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@null"
+                android:hint="Add a caption..."
+                android:paddingStart="@dimen/dimen_8dp"
+                android:textColor="@android:color/white"
+                android:textColorHint="@android:color/white" />
+        </LinearLayout>
+    </LinearLayout>
+</RelativeLayout>
