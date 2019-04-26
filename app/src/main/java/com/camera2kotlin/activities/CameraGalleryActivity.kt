@@ -502,7 +502,7 @@ class CameraGalleryActivity : ProgressActivity(), OnClickListener,
         if (selectedFiles > 0) {
             topCaptionLayout1!!.visibility = GONE
             topCaptionLayout2!!.visibility = VISIBLE
-            fileCounter!!.text = "$selectedFiles.toString()  File(s) Selected"
+            fileCounter!!.text = "$selectedFiles  File(s) Selected"
         } else {
             fileCounter!!.text = ""
             topCaptionLayout1!!.visibility = VISIBLE
@@ -1268,6 +1268,7 @@ class CameraGalleryActivity : ProgressActivity(), OnClickListener,
             }
 
             R.id.submitMedia -> sendDataToNextScreen(adapter!!.getSelectedFileList())
+
             R.id.sendSelected -> sendDataToNextScreen(mListAdapter!!.getSelectedFileList())
         }
     }
@@ -1301,15 +1302,16 @@ class CameraGalleryActivity : ProgressActivity(), OnClickListener,
 
         for (str in mFileList) {
 
-            val media : MediaData? = null
-            media?.filePath = str
+            val media = MediaData()
+
+            media.filePath = str
 
             if (MediaFileUtils.isVideoFile(str)) {
-                media?.fileType = MEDIA_VIDEO
-                media?.outPutFilePath = Environment.getExternalStorageDirectory().toString() + File.separator + File(str).name
+                media.fileType = MEDIA_VIDEO
+                media.outPutFilePath = Environment.getExternalStorageDirectory().toString() + File.separator + File(str).name
             } else {
-                media?.fileType = MEDIA_PICTURE
-                media?.outPutFilePath = Environment.getExternalStorageDirectory().toString() + File.separator + File(str).name
+                media.fileType = MEDIA_PICTURE
+                media.outPutFilePath = Environment.getExternalStorageDirectory().toString() + File.separator + File(str).name
             }
             mediaList.add(media)
         }

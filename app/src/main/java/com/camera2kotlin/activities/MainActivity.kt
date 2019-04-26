@@ -16,11 +16,13 @@ import com.camera2kotlin.utils.MediaFileUtils
 import com.gun0912.tedpermission.PermissionListener
 import com.gun0912.tedpermission.TedPermission
 import java.io.File
+import java.lang.StringBuilder
 
 
 class MainActivity : AppCompatActivity() {
 
     private var tvClick: TextView? = null
+    private var viewData: TextView? = null
 
     private val permissionListener = object : PermissionListener {
         override fun onPermissionGranted() {
@@ -46,6 +48,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         tvClick = findViewById(R.id.ClickMe)
+        viewData = findViewById(R.id.viewData)
         tvClick?.setOnClickListener { askPermissionforCamera() }
     }
 
@@ -66,24 +69,26 @@ class MainActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
+       val filenames = StringBuilder()
+
         for (mediaData in MediaFileUtils.getMediaList()) {
 
-            if (mediaData.fileType == MEDIA_VIDEO) {
+            val source = if (mediaData.fileType == MEDIA_VIDEO) {
                 var filePath = mediaData.outPutFilePath
                 if (!mediaData.isTrimmed)
                     filePath = mediaData.filePath
-                val source = File(filePath)
+
+                File(filePath)
 
             } else {
-                var filePath = mediaData.outPutFilePath
-                if (!mediaData.isTrimmed)
-                    filePath = mediaData.filePath
-                val source = File(filePath)
-
+                File(mediaData.outPutFilePath)
             }
 
-        }
-    }
+            filenames.append(source.name)
+            filenames.append("\n")
 
+        }
+        viewData!!.text = filenames.toString()
+    }
 
 }
