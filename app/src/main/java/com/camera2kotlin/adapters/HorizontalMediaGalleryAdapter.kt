@@ -23,17 +23,21 @@ class HorizontalMediaGalleryAdapter(
     private val isMultiSelect: Boolean
 ) : RecyclerView.Adapter<HorizontalMediaGalleryAdapter.MyViewHolder>() {
 
-    private val options: RequestOptions
-    val selectedFilesList: ArrayList<String>?
+    private val options: RequestOptions = RequestOptions()
+    private val selectedFilesList: ArrayList<String> = ArrayList()
     private var isRemoved: Boolean = false
 
     override fun getItemCount(): Int {
         return mFileList.size
     }
 
-    init {
-        options = RequestOptions()
-        selectedFilesList = ArrayList()
+    fun getSelectedFileList(): ArrayList<String> {
+        return selectedFilesList
+    }
+
+    fun clearFileList() {
+        selectedFilesList.clear()
+        notifyDataSetChanged()
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
@@ -42,14 +46,12 @@ class HorizontalMediaGalleryAdapter(
     }
 
     override fun onBindViewHolder(@NonNull holder: MyViewHolder, position: Int) {
-        val pos = holder.getAdapterPosition()
+        val pos = holder.adapterPosition
 
-        if (MediaFileUtils.isGifFile(mFileList[pos])) {
-            holder.mediaTypeIcon.setImageResource(0)
-        } else if (MediaFileUtils.isVideoFile(mFileList[pos])) {
-            holder.mediaTypeIcon.setImageResource(R.drawable.ic_outline_videocam_24px)
-        } else {
-            holder.mediaTypeIcon.setImageResource(0)
+        when {
+            MediaFileUtils.isGifFile(mFileList[pos]) -> holder.mediaTypeIcon.setImageResource(0)
+            MediaFileUtils.isVideoFile(mFileList[pos]) -> holder.mediaTypeIcon.setImageResource(R.drawable.ic_outline_videocam_24px)
+            else -> holder.mediaTypeIcon.setImageResource(0)
         }
 
 
@@ -61,7 +63,7 @@ class HorizontalMediaGalleryAdapter(
                 .into(holder.mediaPreview)
         }
 
-        if (selectedFilesList != null && selectedFilesList.contains(mFileList[pos])) {
+        if (selectedFilesList.contains(mFileList[pos])) {
             holder.tick.setImageResource(R.drawable.ic_outline_done_24px)
             holder.tick.setBackgroundColor(mContext.resources.getColor(R.color.selected_bg))
         } else {
@@ -72,24 +74,22 @@ class HorizontalMediaGalleryAdapter(
         holder.itemView.setOnLongClickListener {
             if (mContext is CameraGalleryActivity && isMultiSelect) {
                 try {
-                    if (selectedFilesList!!.contains(mFileList[pos]) && selectedFilesList.size > 0) {
+                    isRemoved = if (selectedFilesList.contains(mFileList[pos]) && selectedFilesList.size > 0) {
                         selectedFilesList.remove(mFileList[pos])
-                        isRemoved = true
+                        true
                     } else {
                         selectedFilesList.add(mFileList[pos])
-                        isRemoved = false
+                        false
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
 
                 notifyDataSetChanged()
-                mediaCallback.setSelectionButtonVisibility(selectedFilesList!!.size)
+                mediaCallback.setSelectionButtonVisibility(selectedFilesList.size)
             }
             true
         }
-
-
 
         holder.itemView.setOnClickListener {
             if (!isMultiSelect) {
@@ -97,7 +97,7 @@ class HorizontalMediaGalleryAdapter(
             } else {
 
                 if (mContext is CameraGalleryActivity) {
-                    if (selectedFilesList!!.contains(mFileList[pos]) && selectedFilesList.size > 0) {
+                    if (selectedFilesList.contains(mFileList[pos]) && selectedFilesList.size > 0) {
                         selectedFilesList.remove(mFileList[pos])
                         isRemoved = true
                     } else {
@@ -126,26 +126,11 @@ class HorizontalMediaGalleryAdapter(
             }
             notifyDataSetChanged()
         }
-
-    }
-
-    fun clearFileList() {
-        selectedFilesList!!.clear()
-        notifyDataSetChanged()
     }
 
     inner class MyViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-
-        val mediaPreview: AppCompatImageView
-        val mediaTypeIcon: AppCompatImageView
-        val tick: AppCompatImageView
-
-        init {
-            mediaPreview = view.findViewById(R.id.imagePreview)
-            mediaTypeIcon = view.findViewById(R.id.mediaType)
-            tick = view.findViewById(R.id.tick)
-        }
-
+        val mediaPreview: AppCompatImageView = view.findViewById(R.id.imagePreview)
+        val mediaTypeIcon: AppCompatImageView = view.findViewById(R.id.mediaType)
+        val tick: AppCompatImageView = view.findViewById(R.id.tick)
     }
-
 }

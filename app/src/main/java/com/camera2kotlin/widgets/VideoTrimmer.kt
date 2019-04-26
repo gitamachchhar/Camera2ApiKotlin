@@ -6,6 +6,7 @@ import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Handler
 import android.os.Message
+import android.os.RecoverySystem
 import android.util.AttributeSet
 import android.util.Log
 import android.view.GestureDetector
@@ -105,7 +106,7 @@ class VideoTrimmer : FrameLayout {
             }
         })
 
-        mListeners!!.add(mVideoProgressIndicator)
+        mListeners!!.add(mVideoProgressIndicator as OnProgressVideoListener)
 
         val gestureDetector = GestureDetector(context,
             object : GestureDetector.SimpleOnGestureListener() {
@@ -116,13 +117,13 @@ class VideoTrimmer : FrameLayout {
             }
         )
 
-        mVideoView!!.setOnErrorListener { mediaPlayer, what, extra ->
+        mVideoView!!.setOnErrorListener { _, what, _ ->
             if (mOnTrimVideoListener != null)
                 mOnTrimVideoListener!!.onError("Something went wrong reason : $what")
             false
         }
 
-        mVideoView!!.setOnTouchListener { v, event ->
+        mVideoView!!.setOnTouchListener { _, event ->
             gestureDetector.onTouchEvent(event)
             true
         }

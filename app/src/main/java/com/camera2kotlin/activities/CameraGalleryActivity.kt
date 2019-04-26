@@ -56,9 +56,10 @@ import java.io.IOException
 import java.util.*
 import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
+import java.util.regex.PatternSyntaxException
 
-class CameraGalleryActivity : ProgressActivity(), View.OnClickListener,
-    ActivityCompat.OnRequestPermissionsResultCallback, View.OnLongClickListener, MediaSelectionCallback {
+class CameraGalleryActivity : ProgressActivity(), OnClickListener,
+    ActivityCompat.OnRequestPermissionsResultCallback, OnLongClickListener, MediaSelectionCallback {
 
     private var cameraFace = BACK_CAMERA
     private var mediaType = MEDIA_PICTURE
@@ -77,15 +78,14 @@ class CameraGalleryActivity : ProgressActivity(), View.OnClickListener,
     private var mTextureView: AutoFitTextureView? = null
     private var tvTimer: AppCompatTextView? = null
     private var fileCounter: AppCompatTextView? = null
-    private var mTvMediacounter: AppCompatTextView? = null
-    private var mBottomSheetBehavior: BottomSheetBehavior? = null
+    private var mTvMediaCounter: AppCompatTextView? = null
+    private var mBottomSheetBehavior: BottomSheetBehavior<LinearLayoutCompat>? = null
     private var bottomSheet: LinearLayoutCompat? = null
-    private var expand_icon: AppCompatImageView? = null
+    private var iVExpandIcon: AppCompatImageView? = null
     private var openLargeGallery: AppCompatImageView? = null
     private var sendSelected: RelativeLayout? = null
     private var mIvCaptureMedia: AppCompatImageView? = null
     private var mIvCameraface: AppCompatImageView? = null
-    private var bottomCaptionLayout: LinearLayout? = null
     private var topCaptionLayout2: LinearLayout? = null
     private var topCaptionLayout1: LinearLayout? = null
     private var mRvListMedia: RecyclerView? = null
@@ -152,7 +152,7 @@ class CameraGalleryActivity : ProgressActivity(), View.OnClickListener,
                 mCameraOpenCloseLock.release()
 
                 if (null != mTextureView) {
-                    configureTransform(mTextureView!!.getWidth(), mTextureView!!.getHeight())
+                    configureTransform(mTextureView!!.width, mTextureView!!.height)
                 }
 
                 if (mIsRecordingVideo)
@@ -262,10 +262,10 @@ class CameraGalleryActivity : ProgressActivity(), View.OnClickListener,
             override fun onStateChanged(@NonNull bottomSheet: View, newState: Int) {
                 when (newState) {
                     BottomSheetBehavior.STATE_COLLAPSED -> {
-                        mBottomSheetBehavior!!.setPeekHeight(pickHeight)
-                        expand_icon!!.animate().rotation(0F).setDuration(500).start()
+                        mBottomSheetBehavior!!.peekHeight = pickHeight
+                        iVExpandIcon!!.animate().rotation(0F).setDuration(500).start()
                     }
-                    BottomSheetBehavior.STATE_EXPANDED -> expand_icon!!.animate().rotation(180F).setDuration(500).start()
+                    BottomSheetBehavior.STATE_EXPANDED -> iVExpandIcon!!.animate().rotation(180F).setDuration(500).start()
                 }
             }
 
@@ -273,8 +273,8 @@ class CameraGalleryActivity : ProgressActivity(), View.OnClickListener,
         })
 
         if (isGallery) {
-            expand_icon!!.visibility = INVISIBLE
-            mBottomSheetBehavior!!.setState(BottomSheetBehavior.STATE_EXPANDED)
+            iVExpandIcon!!.visibility = INVISIBLE
+            mBottomSheetBehavior!!.state = BottomSheetBehavior.STATE_EXPANDED
 
             val params = bottomSheet!!.layoutParams as CoordinatorLayout.LayoutParams
             params.behavior = null
@@ -283,24 +283,21 @@ class CameraGalleryActivity : ProgressActivity(), View.OnClickListener,
 
         getImageFilePath()
 
-        val mediaFileList: ArrayList<String>?
-        MediaFileUtils.clearFileList()
-
-        if (isImageOnly) {
-            mediaFileList = MediaFileUtils.getImageFile(Environment.getExternalStorageDirectory())
-        } else {
-            mediaFileList = MediaFileUtils.getFile(Environment.getExternalStorageDirectory())
+        val mediaFileList = when {
+            isImageOnly -> MediaFileUtils.getImageFile(Environment.getExternalStorageDirectory())
+            else -> getFile(Environment.getExternalStorageDirectory())
         }
+        MediaFileUtils.clearFileList()
 
         if (mediaFileList != null) {
 
-            val t1 = TreeSet(FileTimeComparator())
+              val t1 = TreeSet(FileTimeComparator())
 
-            for (path in mediaFileList) {
-                t1.add(path)
-            }
+              for (path in mediaFileList) {
+                  t1.add(path)
+              }
 
-            mediaFileList.reverse()
+              mediaFileList.reverse()
 
             setupHorizontalGallary(mediaFileList)
             setupGridView(mediaFileList)
@@ -330,7 +327,50 @@ class CameraGalleryActivity : ProgressActivity(), View.OnClickListener,
     }
 
 
+    private val filePathList = ArrayList<String>()
 
+    @Throws(PatternSyntaxException::class)
+    fun getFile(dir: File): ArrayList<String>? {
+
+        val listFile = dir.listFiles()
+
+        if (listFile != null && listFile.isNotEmpty()) {
+
+            for (lFile in listFile) {
+
+                if ((lFile.name.equals("Android",ignoreCase = true) && lFile.isDirectory) || lFile.name.startsWith(".")) {
+                    continue
+                }
+
+                if (lFile.isDirectory) {
+                    getFile(lFile)
+                } else {
+
+                    if (lFile.name.contains(".jpg")
+                        || lFile.name.contains(".jpeg")
+                        || lFile.name.contains(".gif")
+                        || lFile.name.contains(".png")
+                        || lFile.name.contains(".mp4")
+                        || lFile.name.contains(".mpeg4")
+                        || lFile.name.contains(".avi")
+                        || lFile.name.contains(".wmv")
+                        || lFile.name.contains(".3gp")
+                    ) {
+
+                        if (lFile.name.toLowerCase().contains(".3gp") && !MediaFileUtils.isVideoFile(lFile.name))
+                            continue
+                        else if (lFile.name.toLowerCase().contains(".wav") && !MediaFileUtils.isVideoFile(lFile.name))
+                            continue
+
+                        filePathList.add(lFile.absolutePath)
+                    }
+                }
+            }
+        }
+
+        return if (filePathList.size == 0) null else filePathList
+
+    }
 
     class FileTimeComparator : Comparator<String> {
 
@@ -341,12 +381,10 @@ class CameraGalleryActivity : ProgressActivity(), View.OnClickListener,
 
             val k = e1.lastModified() - e2.lastModified()
 
-            return if (k > 0) {
-                1
-            } else if (k == 0L) {
-                0
-            } else {
-                -1
+            return when {
+                k > 0 -> 1
+                k == 0L -> 0
+                else -> -1
             }
 
         }
@@ -362,36 +400,35 @@ class CameraGalleryActivity : ProgressActivity(), View.OnClickListener,
         mIvCaptureMedia = findViewById(R.id.captureMedia)
         mIvCameraface = findViewById(R.id.cameraFace)
         openLargeGallery = findViewById(R.id.openLargeGallery)
-        expand_icon = findViewById(R.id.expand_icon)
+        iVExpandIcon = findViewById(R.id.expand_icon)
         mRvListMedia = findViewById(R.id.listMedia)
         tvTimer = findViewById(R.id.tvTimer)
         mTextureView = findViewById(R.id.texture)
-        bottomCaptionLayout = findViewById(R.id.bottomCaptionLayout)
         val mClMain = findViewById<CoordinatorLayout>(R.id.cl_main)
 
-        val icon_back = findViewById<AppCompatImageView>(R.id.icon_back)
+        val iconBack = findViewById<AppCompatImageView>(R.id.icon_back)
         val submitMedia = findViewById<AppCompatTextView>(R.id.submitMedia)
         topCaptionLayout2 = findViewById(R.id.topCaptionLayout2)
         topCaptionLayout1 = findViewById(R.id.topCaptionLayout1)
         fileCounter = findViewById(R.id.fileCounter)
         sendSelected = findViewById(R.id.sendSelected)
-        mTvMediacounter = findViewById(R.id.media_counter)
+        mTvMediaCounter = findViewById(R.id.media_counter)
 
         pickHeight = MediaFileUtils.convertDpToPixel(resources.getDimension(R.dimen.bottom_sheet_height), this)
         pickHeight = 0
 
         bottomSheet = findViewById(R.id.bottomSheet)
         mBottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
-        mBottomSheetBehavior!!.setPeekHeight(pickHeight)
-        mBottomSheetBehavior!!.setState(BottomSheetBehavior.STATE_COLLAPSED)
+        mBottomSheetBehavior!!.peekHeight = pickHeight
+        mBottomSheetBehavior!!.state = BottomSheetBehavior.STATE_COLLAPSED
 
         findViewById<AppCompatImageView>(R.id.ic_back).setOnClickListener(this)
         sendSelected!!.setOnClickListener(this)
         mIvCaptureMedia!!.setOnLongClickListener(this)
         mIvCameraface!!.setOnClickListener(this)
-        expand_icon!!.setOnClickListener(this)
+        iVExpandIcon!!.setOnClickListener(this)
 
-        icon_back.setOnClickListener(this)
+        iconBack.setOnClickListener(this)
         submitMedia.setOnClickListener(this)
 
         mDetector = GestureDetectorCompat(this, GalleryGestureListener())
@@ -415,7 +452,7 @@ class CameraGalleryActivity : ProgressActivity(), View.OnClickListener,
         ): Boolean {
 
             if (event1.y > event2.y) {
-                mBottomSheetBehavior!!.setState(if (mBottomSheetBehavior!!.getState() == BottomSheetBehavior.STATE_COLLAPSED) BottomSheetBehavior.STATE_EXPANDED else BottomSheetBehavior.STATE_COLLAPSED)
+                mBottomSheetBehavior!!.state = if (mBottomSheetBehavior!!.state == BottomSheetBehavior.STATE_COLLAPSED) BottomSheetBehavior.STATE_EXPANDED else BottomSheetBehavior.STATE_COLLAPSED
             }
             return true
         }
@@ -441,14 +478,12 @@ class CameraGalleryActivity : ProgressActivity(), View.OnClickListener,
             try {
 
                 if (isVisible) {
-                    bottomCaptionLayout!!.visibility = VISIBLE
                     openLargeGallery!!.visibility = GONE
                     mRvListMedia!!.visibility = GONE
                     mIvCaptureMedia!!.visibility = GONE
                     mIvCameraface!!.visibility = GONE
 
                 } else {
-                    bottomCaptionLayout!!.visibility = GONE
                     openLargeGallery!!.visibility = VISIBLE
                     mRvListMedia!!.visibility = VISIBLE
                     mIvCaptureMedia!!.visibility = VISIBLE
@@ -467,7 +502,7 @@ class CameraGalleryActivity : ProgressActivity(), View.OnClickListener,
         if (selectedFiles > 0) {
             topCaptionLayout1!!.visibility = GONE
             topCaptionLayout2!!.visibility = VISIBLE
-            fileCounter!!.text = selectedFiles.toString() + " File(s) Selected"
+            fileCounter!!.text = "$selectedFiles.toString()  File(s) Selected"
         } else {
             fileCounter!!.text = ""
             topCaptionLayout1!!.visibility = VISIBLE
@@ -483,7 +518,7 @@ class CameraGalleryActivity : ProgressActivity(), View.OnClickListener,
         mRvListMedia!!.adapter = mListAdapter
     }
 
-    private fun setupGridView(mediaFileList: ArrayList<String>?) {
+    private fun setupGridView(mediaFileList: ArrayList<String>) {
         adapter = GalleryAdapter(mediaFileList, this, isMultiSelect)
         val fullscreenGallery = findViewById<GridView>(R.id.fullscreenGallery)
         fullscreenGallery.adapter = adapter
@@ -556,7 +591,6 @@ class CameraGalleryActivity : ProgressActivity(), View.OnClickListener,
                 mImageReader!!.setOnImageAvailableListener(
                     mOnImageAvailableListener, mBackgroundHandler
                 )
-
 
                 mSensorOrientation = characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION)!!
 
@@ -643,7 +677,7 @@ class CameraGalleryActivity : ProgressActivity(), View.OnClickListener,
             if (ActivityCompat.checkSelfPermission(
                     this,
                     Manifest.permission.CAMERA
-                ) !== PackageManager.PERMISSION_GRANTED
+                ) != PackageManager.PERMISSION_GRANTED
             ) {
                 return
             }
@@ -684,10 +718,8 @@ class CameraGalleryActivity : ProgressActivity(), View.OnClickListener,
 
 
             val characteristics = manager.getCameraCharacteristics(cameraId)
-            var map: StreamConfigurationMap? = null
-            map = characteristics
+            val map: StreamConfigurationMap? = characteristics
                 .get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
-
 
             mSensorOrientation = characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION)!!
 
@@ -714,7 +746,7 @@ class CameraGalleryActivity : ProgressActivity(), View.OnClickListener,
             if (ActivityCompat.checkSelfPermission(
                     this,
                     Manifest.permission.CAMERA
-                ) !== PackageManager.PERMISSION_GRANTED
+                ) != PackageManager.PERMISSION_GRANTED
             ) {
                 return
             }
@@ -767,7 +799,7 @@ class CameraGalleryActivity : ProgressActivity(), View.OnClickListener,
 
 
     private fun startRecordingVideo() {
-        if (null == mCameraDevice || !mTextureView!!.isAvailable() || null == mPreviewSize) {
+        if (null == mCameraDevice || !mTextureView!!.isAvailable || null == mPreviewSize) {
             return
         }
         try {
@@ -847,19 +879,22 @@ class CameraGalleryActivity : ProgressActivity(), View.OnClickListener,
 
         Realm.getDefaultInstance().executeTransactionAsync({ realm ->
             realm.where(MediaData::class.java).findAll().deleteAllFromRealm()
-            val mData : MediaData? = null
-            mData?.filePath = path!!
-            mData?.outPutFilePath = Environment.getExternalStorageDirectory().toString() + File.separator + File(path).name
-            mData?.fileType = mediaType
-            mData?.isTrimmed = false
-            mData?.startTime = 0
+
+            val mData = MediaData()
+            mData.filePath = path!!
+            mData.outPutFilePath = Environment.getExternalStorageDirectory().toString() + File.separator + File(path).name
+            mData.fileType = mediaType
+            mData.isTrimmed = false
+            mData.startTime = 0
             realm.insertOrUpdate(mData)
         }, {
             val i = Intent(this@CameraGalleryActivity, SelectMediaFileActivity::class.java)
             i.putExtra("mode", "SingleSelect")
             i.putExtra(ISIMAGEONLY, isImageOnly)
             startActivityForResult(i, 102)
-        }, { error -> Log.e("System out", "On Error " + error.message) })
+        }, {
+                error -> Log.e("System out", "On Error " + error.message)
+        })
     }
 
     private fun sendDataList(path: RealmList<MediaData>) {
@@ -878,10 +913,9 @@ class CameraGalleryActivity : ProgressActivity(), View.OnClickListener,
 
     fun previewSelectedGalleryMedia(path: String) {
 
-        if (MediaFileUtils.isVideoFile(path)) {
-            mediaType = MEDIA_VIDEO
-        } else {
-            mediaType = MEDIA_PICTURE
+        mediaType = when {
+            MediaFileUtils.isVideoFile(path) -> MEDIA_VIDEO
+            else -> MEDIA_PICTURE
         }
         sendData(path, mediaType)
     }
@@ -1101,7 +1135,7 @@ class CameraGalleryActivity : ProgressActivity(), View.OnClickListener,
             val rotation = windowManager.defaultDisplay.rotation
             captureBuilder.set(CaptureRequest.JPEG_ORIENTATION, getOrientation(rotation))
 
-            val CaptureCallback = object : CameraCaptureSession.CaptureCallback() {
+            val captureCallback = object : CameraCaptureSession.CaptureCallback() {
 
                 override fun onCaptureCompleted(
                     @NonNull session: CameraCaptureSession,
@@ -1122,7 +1156,7 @@ class CameraGalleryActivity : ProgressActivity(), View.OnClickListener,
 
             mCaptureSession!!.stopRepeating()
             mCaptureSession!!.abortCaptures()
-            mCaptureSession!!.capture(captureBuilder.build(), CaptureCallback, null)
+            mCaptureSession!!.capture(captureBuilder.build(), captureCallback, null)
 
         } catch (e: CameraAccessException) {
             e.printStackTrace()
@@ -1190,13 +1224,13 @@ class CameraGalleryActivity : ProgressActivity(), View.OnClickListener,
         return true
     }
 
-    internal fun updateVideoRecordingTimer() {
+    private fun updateVideoRecordingTimer() {
 
         tvTimer!!.visibility = VISIBLE
 
         val timerHandler = Handler()
         updater = Runnable {
-            runOnUiThread { tvTimer!!.setText(formatTimer(recordCounter)) }
+            runOnUiThread { tvTimer!!.text = formatTimer(recordCounter) }
             if (mIsRecordingVideo)
                 timerHandler.postDelayed(updater, 1000)
 
@@ -1223,7 +1257,7 @@ class CameraGalleryActivity : ProgressActivity(), View.OnClickListener,
                 openCamera(mWidth, mHeight, cameraFace)
             }
 
-            R.id.expand_icon -> mBottomSheetBehavior!!.setState(if (mBottomSheetBehavior!!.getState() == BottomSheetBehavior.STATE_COLLAPSED) BottomSheetBehavior.STATE_EXPANDED else BottomSheetBehavior.STATE_COLLAPSED)
+            R.id.expand_icon -> mBottomSheetBehavior!!.setState(if (mBottomSheetBehavior!!.state == BottomSheetBehavior.STATE_COLLAPSED) BottomSheetBehavior.STATE_EXPANDED else BottomSheetBehavior.STATE_COLLAPSED)
 
             R.id.ic_back -> onBackPressed()
 
@@ -1233,31 +1267,31 @@ class CameraGalleryActivity : ProgressActivity(), View.OnClickListener,
                     adapter!!.clearFileList()
             }
 
-//            R.id.submitMedia -> sendDataToNextScreen(adapter!!.getSelectedFileList())
-//            R.id.sendSelected -> sendDataToNextScreen(mListAdapter!!.getSelectedFilesList())
+            R.id.submitMedia -> sendDataToNextScreen(adapter!!.getSelectedFileList())
+            R.id.sendSelected -> sendDataToNextScreen(mListAdapter!!.getSelectedFileList())
         }
     }
 
     override fun onBackPressed() {
 
-       /* if (isGallery) {
-            if (adapter != null && adapter!!.getSelectedFileList().size() > 0) {
+        if (isGallery) {
+            if (adapter != null && adapter!!.getSelectedFileList().size > 0) {
                 adapter!!.clearFileList()
                 updateActionBar(0)
             } else {
                 finish()
             }
-        } else if (mListAdapter != null && mListAdapter!!.getSelectedFilesList().size() > 0) {
+        } else if (mListAdapter != null && mListAdapter!!.getSelectedFileList().size > 0) {
             mListAdapter!!.clearFileList()
             setSelectionButtonVisibility(0)
-        } else if (adapter != null && adapter!!.getSelectedFileList().size() > 0) {
+        } else if (adapter != null && adapter!!.getSelectedFileList().size > 0) {
             adapter!!.clearFileList()
             updateActionBar(0)
-        } else if (mBottomSheetBehavior!!.getState() == BottomSheetBehavior.STATE_EXPANDED) {
+        } else if (mBottomSheetBehavior!!.state == BottomSheetBehavior.STATE_EXPANDED) {
             mBottomSheetBehavior!!.setState(BottomSheetBehavior.STATE_COLLAPSED)
         } else {
             super.onBackPressed()
-        }*/
+        }
 
     }
 
@@ -1297,7 +1331,7 @@ class CameraGalleryActivity : ProgressActivity(), View.OnClickListener,
 
     override fun setSelectionButtonVisibility(size: Int) {
         setSelectedSendButtonVisibility(size)
-        mTvMediacounter!!.setText(size.toString())
+        mTvMediaCounter!!.text = size.toString()
     }
 
     private class ImageSaver internal constructor(private val mImage: Image, private val mFile: File?) : Runnable {

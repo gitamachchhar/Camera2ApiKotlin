@@ -28,6 +28,7 @@ import com.camera2kotlin.model.MediaData
 import com.camera2kotlin.utils.Constants.ISIMAGEONLY
 import com.camera2kotlin.utils.MediaFileUtils
 import com.camera2kotlin.widgets.VideoTrimmer
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import io.realm.Realm
 import java.io.IOException
 import java.util.*
@@ -62,7 +63,7 @@ class SelectMediaFileActivity : ProgressActivity(), View.OnClickListener, MediaS
 
         val isImageOnly = intent.getBooleanExtra(ISIMAGEONLY, false)
 
-        val sendMessage = findViewById<AppCompatImageView>(R.id.sendMessage)
+        val sendMessage = findViewById<FloatingActionButton>(R.id.sendMessage)
         val iv_imageBack = findViewById<AppCompatImageView>(R.id.iv_imageBack)
         val icon_back_camera = findViewById<AppCompatImageView>(R.id.icon_back_camera)
 
@@ -138,7 +139,7 @@ class SelectMediaFileActivity : ProgressActivity(), View.OnClickListener, MediaS
 
     private fun setVideoSettings() {
 
-        fullImageView!!.setVisibility(View.GONE)
+        fullImageView!!.visibility = View.GONE
         llContainer!!.visibility = View.VISIBLE
         val mp = MediaPlayer.create(this, Uri.parse(mMediaPath))
         val duration = mp.duration
@@ -263,7 +264,7 @@ class SelectMediaFileActivity : ProgressActivity(), View.OnClickListener, MediaS
 
             val data = Realm.getDefaultInstance().copyFromRealm(mediaData)
             if (data != null) {
-                data.fileCaption = edtCaption!!.getText().toString()
+                data.fileCaption = edtCaption!!.text.toString()
             }
             isTextChanged = false
 

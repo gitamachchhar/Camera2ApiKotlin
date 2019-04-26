@@ -112,7 +112,7 @@ class TimeLineView @JvmOverloads constructor(@NonNull context: Context, attrs: A
 
                 if (bitmap != null) {
                     canvas.drawBitmap(bitmap, x.toFloat(), 0f, null)
-                    x = x + bitmap.width
+                    x += bitmap.width
                 }
             }
         }
